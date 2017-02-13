@@ -1,0 +1,77 @@
+﻿@using ZenithDataLib.Models
+@using ZenithWebSite.Compare
+@model IEnumerable<ZenithDataLib.Models.Activity>
+
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>Zenith Society</h1>
+    <p class="lead">These are the Activities happening this week.</p>
+</div>
+
+<table class="table table-bordered table-hover">
+
+    @{
+        List<Activity> activities = new List<Activity>();
+        List<Event> events = new List<Event>();
+        CustomCompare compare = new CustomCompare();
+
+        foreach (var item in Model){
+            activities.Add(item);
+            foreach (var element in item.Events){
+                events.Add(element);
+            }
+        }
+        events.Sort(compare);
+
+        List<List<Event>> sorted = new List<List<Event>>();
+        for (int i = 0; i < events.Count();i++){ 
+
+            List<Event> e = new List<Event>();
+            e.Add(events.ElementAt(i));
+            String s = events.ElementAt(i).Start.ToString("dddd");
+
+            for (int j = i + 1; j < events.Count(); j++){
+
+                String s2 = events.ElementAt(j).Start.ToString("dddd");
+                if (s.CompareTo(s2) == 0){
+                    e.Add(events.ElementAt(j));
+                    i++;
+                } else {
+                    break;
+                }
+            }
+            sorted.Add(e);
+        }
+
+        for (int i = 0; i < sorted.Count(); i++){
+            <tr  class="info">
+                <th class="text-center" colspan="2">
+                    @Html.Raw(sorted.ElementAt(i).ElementAt(0).Start.ToString("dddd MMMM d, yyyy"))
+                </th>
+            </tr>
+            for (int j = 0; j < sorted.ElementAt(i).Count(); j++){
+                <tr>
+                    <td>
+                        @Html.Raw(sorted.ElementAt(i).ElementAt(j).Start.ToString("hh:mm tt"))  -
+                        @Html.Raw(sorted.ElementAt(i).ElementAt(j).End.ToString("hh:mm tt"))
+                    </td>
+                    <td>
+
+                        @{
+                            int actID = sorted.ElementAt(i).ElementAt(j).ActivityId;
+                            foreach (var model in activities){
+                                if (model.ActivityId == actID){
+                                    @Html.Raw(model.Description)
+                                }
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    }
+
+</table>
